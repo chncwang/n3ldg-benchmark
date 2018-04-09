@@ -155,7 +155,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
     int devNum = devExamples.size(), testNum = testExamples.size();
     int non_exceeds_time = 0;
     auto time_start = std::chrono::high_resolution_clock::now();
-    for (int iter = 0; iter < 100; ++iter) {
+    for (int iter = 0; iter < 1; ++iter) {
         std::cout << "##### Iteration " << iter << std::endl;
         std::vector<int> indexes;
         for (int i = 0; i < trainExamples.size(); ++i) {
@@ -185,7 +185,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
 
             m_driver.updateModel();
 
-            if (updateIter % 10 == 0) {
+            if (updateIter % 100 == 0) {
             std::cout << "current: " << updateIter + 1 << ", total block: "
                     << batchBlock << std::endl;
             metric.print();

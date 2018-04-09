@@ -21,9 +21,12 @@ std::vector<std::string> readLines(const std::string &fullFileName) {
     return lines;
 }
 
+int gWordCount = 0;
+
 void readWordsToInstance(const std::string &line, Instance *instance) {
     std::vector<std::string> words;
     split_bychars(line, words);
+    gWordCount += words.size();
     instance->m_title_words = std::move(words);
 }
 
@@ -45,6 +48,7 @@ void readLabelToInstance(const std::string &parentLine,
     if (!foundRoot) {
         abort();
     }
+    std::cout << "gWordCount:" << gWordCount << std::endl;
 }
 
 std::vector<Instance> readInstancesFromFile(const std::string &textFile,
