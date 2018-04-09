@@ -22,7 +22,7 @@ public:
             abort();
         }
         opts.wordDim = words.nDim;
-        opts.labelSize = 32;
+        opts.labelSize = 5;
         for (int i = 0; i < CNN_LAYER; ++i) {
             if (i == 0) {
                 hidden.at(i).initial(opts.hiddenSize, (1 + 2 * opts.wordContext) * opts.wordDim, true);

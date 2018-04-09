@@ -15,7 +15,6 @@ public:
     Alphabet wordAlpha;
     LSTM1Params left_to_right_lstm;
     LSTM1Params right_to_left_lstm;
-    BiParams bi_params;
 
     UniParams olayer_linear;
     MySoftMaxLoss loss;
@@ -26,11 +25,10 @@ public:
             abort();
         }
         opts.wordDim = words.nDim;
-        opts.labelSize = 32;
+        opts.labelSize = 5;
 
         left_to_right_lstm.initial(opts.hiddenSize, opts.wordDim);
         right_to_left_lstm.initial(opts.hiddenSize, opts.wordDim);
-        bi_params.initial(opts.hiddenSize, opts.hiddenSize, opts.hiddenSize, true);
 
         olayer_linear.initial(opts.labelSize, 2 * opts.hiddenSize, true);
         return true;
@@ -40,7 +38,6 @@ public:
         words.exportAdaParams(ada);
         left_to_right_lstm.exportAdaParams(ada);
         right_to_left_lstm.exportAdaParams(ada);
-        bi_params.exportAdaParams(ada);
         olayer_linear.exportAdaParams(ada);
     }
 

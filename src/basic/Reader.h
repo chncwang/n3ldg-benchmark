@@ -21,27 +21,53 @@ std::vector<std::string> readLines(const std::string &fullFileName) {
     return lines;
 }
 
-void readLineToInstance(const std::string &line, Instance *instance) {
-    int index = line.find_first_of(",");
-    assert(index != std::string::npos);
-    std::string category_str = line.substr(0, index);
-    Category category = ToCategory(category_str);
-    instance->m_category = category;
-    std::string title = line.substr(index);
+void readWordsToInstance(const std::string &line, Instance *instance) {
     std::vector<std::string> words;
-    split_bychars(title, words);
+    split_bychars(line, words);
     instance->m_title_words = std::move(words);
 }
 
-std::vector<Instance> readInstancesFromFile(const std::string &fullFileName) {
-    std::vector<std::string> lines = readLines(fullFileName);
+void readLabelToInstance(const std::string &parentLine,
+        const std::string &labelLine, Instance *instance) {
+    std::vector<std::string> parentStrings, labelStrings;
+    split_bychars(parentLine, parentStrings);
+    split_bychars(labelLine, labelStrings);
+    bool foundRoot = false;
+    for (int i = 0; i < parentStrings.size(); ++i) {
+        std::string &w = parentStrings.at(i);
+        if (w == "0") {
+            foundRoot = true;
+            instance->m_category =
+                static_cast<Category>(2 + std::stoi(labelStrings.at(i)));
+            break;
+        }
+    }
+    if (!foundRoot) {
+        abort();
+    }
+}
+
+std::vector<Instance> readInstancesFromFile(const std::string &textFile,
+        const std::string &parentFile, const std::string &labelFile) {
+    std::vector<std::string> textLines = readLines(textFile);
+    std::vector<std::string> parentLines = readLines(parentFile);
+    std::vector<std::string> labelLines = readLines(labelFile);
+
     std::vector<Instance> instances;
-    for (const std::string &line : lines) {
+    instances.reserve(textLines.size());
+    for (int i = 0; i < textLines.size(); ++i) {
+        std::string &textLine = textLines.at(i);
+        std::string &parentLine = parentLines.at(i);
+        std::string &labelLine = labelLines.at(i);
         Instance instance;
-        readLineToInstance(line, &instance);
+        readWordsToInstance(textLine, &instance);
+        readLabelToInstance(parentLine, labelLine, &instance);
+        for (std::string &w : instance.m_title_words) {
+            std::cout << " " << w;
+        }
+        std::cout << " " << instance.m_category << std::endl;
         instances.push_back(instance);
     }
-
     return instances;
 }
 

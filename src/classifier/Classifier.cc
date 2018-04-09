@@ -113,28 +113,25 @@ void Classifier::train(const string &trainFile, const string &devFile,
         m_options.load(optionFile);
     m_options.showOptions();
 
-    vector<Instance> rawtrainInsts = readInstancesFromFile(trainFile);
+    vector<Instance> rawtrainInsts = readInstancesFromFile(trainFile, devFile, testFile);
     vector<Instance> trainInsts;
     for (Instance &ins : rawtrainInsts) {
         trainInsts.push_back(ins);
     }
 
-    vector<Instance> devInsts = readInstancesFromFile(devFile);
-    vector<Instance> testInsts = readInstancesFromFile(testFile);
-
     createAlphabet(trainInsts);
-    if (!m_options.wordEmbFineTune) {
-        addTestAlpha(devInsts);
-        addTestAlpha(testInsts);
-    }
+    //if (!m_options.wordEmbFineTune) {
+    //    addTestAlpha(devInsts);
+    //    addTestAlpha(testInsts);
+    //}
 
     bool bCurIterBetter = false;
 
     vector<Example> trainExamples, devExamples, testExamples;
 
     initialExamples(trainInsts, trainExamples);
-    initialExamples(devInsts, devExamples);
-    initialExamples(testInsts, testExamples);
+    //initialExamples(devInsts, devExamples);
+    //initialExamples(testInsts, testExamples);
 
     m_word_stats[unknownkey] = m_options.wordCutOff + 1;
     m_driver._modelparams.wordAlpha.initial(m_word_stats, m_options.wordCutOff);
@@ -158,7 +155,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
     int devNum = devExamples.size(), testNum = testExamples.size();
     int non_exceeds_time = 0;
     auto time_start = std::chrono::high_resolution_clock::now();
-    for (int iter = 0; iter < 1; ++iter) {
+    for (int iter = 0; iter < 100; ++iter) {
         std::cout << "##### Iteration " << iter << std::endl;
         std::vector<int> indexes;
         for (int i = 0; i < trainExamples.size(); ++i) {
@@ -188,10 +185,10 @@ void Classifier::train(const string &trainFile, const string &devFile,
 
             m_driver.updateModel();
 
-            if (updateIter % 10 == 1) {
-                std::cout << "current: " << updateIter + 1 << ", total block: "
+            if (updateIter % 10 == 0) {
+            std::cout << "current: " << updateIter + 1 << ", total block: "
                     << batchBlock << std::endl;
-                metric.print();
+            metric.print();
             }
         }
 
@@ -201,57 +198,6 @@ void Classifier::train(const string &trainFile, const string &devFile,
             << "s" << std::endl;
         float accuracy = metric.getAccuracy();
         std::cout << "train set acc:" << metric.getAccuracy() << std::endl;
-        
-        continue;
-        float dev_acc = 0.0;
-        Metric dev_metric;
-        auto dev_time_start = std::chrono::high_resolution_clock::now();
-        bCurIterBetter = false;
-        assert(devExamples.size() > 0);
-        for (int idx = 0; idx < devExamples.size(); idx++) {
-            int excluded_class = -1;
-            Category result = predict(devExamples.at(idx).m_feature, excluded_class);
-
-            devInsts.at(idx).evaluate(result, dev_metric);
-        }
-
-        auto dev_time_end = std::chrono::high_resolution_clock::now();
-        std::cout << "Dev finished. Total time taken is: "
-            << std::chrono::duration<double>(dev_time_end - dev_time_start).count()
-            << "s" << std::endl;
-        std::cout << "dev:" << std::endl;
-        dev_metric.print();
-        dev_acc = dev_metric.getAccuracy();
-
-        if (!m_options.outBest.empty() > bestDIS) {
-            bCurIterBetter = true;
-        }
-
-        float test_acc = 0;
-        auto test_time_start = std::chrono::high_resolution_clock::now();
-        Metric test_metric;
-        for (int idx = 0; idx < testExamples.size(); idx++) {
-            int excluded_class = -1;
-            Category category = predict(testExamples.at(idx).m_feature, excluded_class);
-
-            testInsts.at(idx).evaluate(category, test_metric);
-        }
-
-        auto test_time_end = std::chrono::high_resolution_clock::now();
-        std::cout << "Test finished. Total time taken is: "
-            << std::chrono::duration<double>(
-                    test_time_end - test_time_start).count() << "s" << std::endl;
-        std::cout << "test:" << std::endl;
-        test_metric.print();
-        test_acc = test_metric.getAccuracy();
-
-        if (m_options.saveIntermediate && dev_metric.getAccuracy() > bestDIS) {
-            std::cout << "Exceeds best previous performance of " << bestDIS
-                << " now is " << dev_acc << std::endl;
-            std::cout << "laozhongyi_" << std::min<float>(dev_acc, test_acc) << std::endl;
-            non_exceeds_time = 0;
-            bestDIS = dev_acc;
-        }
     }
 }
 

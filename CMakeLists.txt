@@ -64,7 +64,7 @@ else()
     SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fPIC -funroll-loops -w -std=c++11 -O2 -march=native" )
 endif()
 
-INCLUDE_DIRECTORIES(eigen N3LDG/include ${SRC_DIR}/basic ${SRC_DIR}/classifier/cnn)
+INCLUDE_DIRECTORIES(eigen N3LDG/include ${SRC_DIR}/basic ${SRC_DIR}/classifier/lstm)
 IF(USE_CUDA)
     ADD_SUBDIRECTORY(N3LDG)
     SET(LIBS ${LIBS} n3ldg_cuda)

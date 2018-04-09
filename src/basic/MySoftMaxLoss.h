@@ -29,7 +29,7 @@ public:
 #endif
     inline dtype loss(PNode x, Category answer, Metric& metric, int batchsize = 1) {
         int nDim = x->dim;
-        int labelsize = 32;
+        int labelsize = 5;
         if (labelsize != nDim) {
             std::cerr << "softmax_loss error: dim size invalid" << std::endl;
             abort();
