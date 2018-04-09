@@ -11,7 +11,7 @@
 class WordCounter {
 public:
     int counter = 0;
-    WordCounter& GetInstance() {
+    static WordCounter& GetInstance() {
         static WordCounter *w = NULL;
         if (w == NULL) {
             w = new WordCounter;

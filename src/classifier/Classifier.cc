@@ -195,8 +195,6 @@ void Classifier::train(const string &trainFile, const string &devFile,
             }
         }
 
-        m_driver._cg.
-
         auto time_end = std::chrono::high_resolution_clock::now();
         std::cout << "Train finished. Total time taken is: "
             << std::chrono::duration<double>(time_end - time_start).count()
