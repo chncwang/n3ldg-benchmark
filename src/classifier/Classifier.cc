@@ -158,23 +158,23 @@ void Classifier::train(const string &trainFile, const string &devFile,
     for (int iter = 0; iter < 1; ++iter) {
         std::cout << "##### Iteration " << iter << std::endl;
         std::vector<int> indexes;
-        for (int i = 0; i < trainExamples.size(); ++i) {
-            indexes.push_back(i);
-        }
-        std::random_shuffle(indexes.begin(), indexes.end());
-        int batchBlock = indexes.size() / m_options.batchSize;
-        if (indexes.size() % m_options.batchSize != 0)
+        //for (int i = 0; i < trainExamples.size(); ++i) {
+        //    indexes.push_back(i);
+        //}
+        //std::random_shuffle(indexes.begin(), indexes.end());
+        int batchBlock = trainExamples.size() / m_options.batchSize;
+        if (trainExamples.size() % m_options.batchSize != 0)
             batchBlock++;
         Metric metric;
         for (int updateIter = 0; updateIter < batchBlock; updateIter++) {
             subExamples.clear();
             int start_pos = updateIter * m_options.batchSize;
             int end_pos = (updateIter + 1) * m_options.batchSize;
-            if (end_pos > indexes.size())
-                end_pos = indexes.size();
+            if (end_pos > trainExamples.size())
+                end_pos = trainExamples.size();
 
             for (int idy = start_pos; idy < end_pos; idy++) {
-                subExamples.push_back(trainExamples.at(indexes[idy]));
+                subExamples.push_back(trainExamples.at(idy));
             }
 
             int curUpdateIter = iter * batchBlock + updateIter;
