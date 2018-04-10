@@ -24,6 +24,8 @@ public:
     std::string tostring();
 public:
     vector<string> m_title_words;
+    vector<int> m_parents;
+    int m_root;
     Category m_category;
 };
 

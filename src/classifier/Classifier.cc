@@ -185,7 +185,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
 
             m_driver.updateModel();
 
-            if (updateIter % 100 == 0) {
+            if (updateIter % 10 == 0) {
             std::cout << "current: " << updateIter + 1 << ", total block: "
                     << batchBlock << std::endl;
             metric.print();

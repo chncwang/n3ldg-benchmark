@@ -3,6 +3,7 @@
 
 #include "HyperParams.h"
 #include "MySoftMaxLoss.h"
+#include "DEPLSTM1.h"
 #include "LSTM1.h"
 #include "BiOP.h"
 #include <array>
@@ -13,8 +14,7 @@ class ModelParams{
 public:
     LookupTable words;
     Alphabet wordAlpha;
-    LSTM1Params left_to_right_lstm;
-    LSTM1Params right_to_left_lstm;
+    TreeLSTM1Params tree_lstm;
 
     UniParams olayer_linear;
     MySoftMaxLoss loss;
@@ -27,17 +27,15 @@ public:
         opts.wordDim = words.nDim;
         opts.labelSize = 5;
 
-        left_to_right_lstm.initial(opts.hiddenSize, opts.wordDim);
-        right_to_left_lstm.initial(opts.hiddenSize, opts.wordDim);
+        tree_lstm.initial(opts.hiddenSize, opts.wordDim, NULL);
 
-        olayer_linear.initial(opts.labelSize, 2 * opts.hiddenSize, true);
+        olayer_linear.initial(opts.labelSize, opts.hiddenSize, true);
         return true;
     }
 
     void exportModelParams(ModelUpdate& ada){
         words.exportAdaParams(ada);
-        left_to_right_lstm.exportAdaParams(ada);
-        right_to_left_lstm.exportAdaParams(ada);
+        tree_lstm.exportAdaParams(ada);
         olayer_linear.exportAdaParams(ada);
     }
 

@@ -8,15 +8,13 @@
 #include "UniOP.h"
 #include "BiOP.h"
 #include "LSTM1.h"
+#include "DEPLSTM1.h"
 #include <array>
 
 class GraphBuilder {
 public:
     std::vector<LookupNode> _input_nodes;
-    LSTM1Builder _left_to_right_lstm;
-    LSTM1Builder _right_to_left_lstm;
-    std::vector<ConcatNode> _concat_nodes;
-    MinPoolNode _max_pool_node;
+    TreeLSTM1Builder _tree_lstm_builder;
     LinearNode _neural_output;
 
     Graph *_graph;
@@ -29,9 +27,7 @@ public:
 
     void createNodes(int length_upper_bound) {
         _input_nodes.resize(length_upper_bound);
-        _left_to_right_lstm.resize(length_upper_bound);
-        _right_to_left_lstm.resize(length_upper_bound);
-        _concat_nodes.resize(length_upper_bound);
+        _tree_lstm_builder.resize(length_upper_bound);
     }
 
     void initial(Graph *pcg, ModelParams &model, HyperParams &opts) {
@@ -41,15 +37,8 @@ public:
             n.setParam(&model.words);
         }
 
-        _left_to_right_lstm.init(&model.left_to_right_lstm, opts.dropProb,
-                true);
-        _right_to_left_lstm.init(&model.right_to_left_lstm, opts.dropProb,
-                false);
-        for (ConcatNode &concat : _concat_nodes) {
-            concat.init(opts.hiddenSize * 2, opts.dropProb);
-        }
+        _tree_lstm_builder.init(&model.tree_lstm, opts.dropProb, true);
 
-        _max_pool_node.init(opts.hiddenSize * 2, -1);
         _neural_output.init(opts.labelSize, -1);
         _neural_output.setParam(&model.olayer_linear);
         _modelParams = &model;
@@ -65,18 +54,10 @@ public:
         std::vector<Node*> input_node_ptrs =
             toPointers<LookupNode, Node>(_input_nodes,
                     feature.m_title_words.size());
-        _left_to_right_lstm.forward(_graph, input_node_ptrs);
-        _right_to_left_lstm.forward(_graph, input_node_ptrs);
-        for (int i = 0; i < feature.m_title_words.size(); ++i) {
-            _concat_nodes.at(i).forward(_graph,
-                    &_left_to_right_lstm._hiddens.at(i),
-                    &_right_to_left_lstm._hiddens.at(i));
-        }
 
-        std::vector<Node*> bi_node_ptrs = toPointers<ConcatNode, Node>(_concat_nodes,
-                feature.m_title_words.size());
-        _max_pool_node.forward(_graph, bi_node_ptrs);
-        _neural_output.forward(_graph, &_max_pool_node);
+        _tree_lstm_builder.forward(_graph, input_node_ptrs, feature.m_parents);
+
+        _neural_output.forward(_graph, &_tree_lstm_builder._hiddens.at(feature.m_root));
     }
 };
 

@@ -36,15 +36,19 @@ void readLabelToInstance(const std::string &parentLine,
     split_bychars(parentLine, parentStrings);
     split_bychars(labelLine, labelStrings);
     bool foundRoot = false;
+    std::vector<int> parents;
     for (int i = 0; i < parentStrings.size(); ++i) {
         std::string &w = parentStrings.at(i);
         if (w == "0") {
             foundRoot = true;
             instance->m_category =
                 static_cast<Category>(2 + std::stoi(labelStrings.at(i)));
-            break;
+            instance->m_root = i;
         }
+        int n = std::stoi(w);
+        parents.push_back(n - 1);
     }
+    instance->m_parents = parents;
     if (!foundRoot) {
         abort();
     }
