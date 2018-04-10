@@ -52,7 +52,6 @@ void readLabelToInstance(const std::string &parentLine,
     if (!foundRoot) {
         abort();
     }
-    std::cout << "gWordCount:" << gWordCount << std::endl;
 }
 
 std::vector<Instance> readInstancesFromFile(const std::string &textFile,
@@ -70,12 +69,9 @@ std::vector<Instance> readInstancesFromFile(const std::string &textFile,
         Instance instance;
         readWordsToInstance(textLine, &instance);
         readLabelToInstance(parentLine, labelLine, &instance);
-        for (std::string &w : instance.m_title_words) {
-            std::cout << " " << w;
-        }
-        std::cout << " " << instance.m_category << std::endl;
         instances.push_back(instance);
     }
+    std::cout << "gWordCount:" << gWordCount << std::endl;
     return instances;
 }
 

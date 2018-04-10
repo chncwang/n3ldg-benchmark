@@ -155,6 +155,9 @@ void Classifier::train(const string &trainFile, const string &devFile,
     int devNum = devExamples.size(), testNum = testExamples.size();
     int non_exceeds_time = 0;
     auto time_start = std::chrono::high_resolution_clock::now();
+    n3ldg_cuda::Profiler &profiler = n3ldg_cuda::Profiler::Ins();
+    profiler.SetEnabled(true);
+    profiler.BeginEvent("total");
     for (int iter = 0; iter < 1; ++iter) {
         std::cout << "##### Iteration " << iter << std::endl;
         std::vector<int> indexes;
@@ -180,25 +183,26 @@ void Classifier::train(const string &trainFile, const string &devFile,
             int curUpdateIter = iter * batchBlock + updateIter;
             dtype cost = m_driver.train(subExamples, curUpdateIter);
 
-            metric.overall_label_count += m_driver._metric.overall_label_count;
-            metric.correct_label_count += m_driver._metric.correct_label_count;
+            //metric.overall_label_count += m_driver._metric.overall_label_count;
+            //metric.correct_label_count += m_driver._metric.correct_label_count;
 
             m_driver.updateModel();
 
-            if (updateIter % 10 == 0) {
-            std::cout << "current: " << updateIter + 1 << ", total block: "
-                    << batchBlock << std::endl;
-            metric.print();
-            }
+//            if (updateIter % 10 == 0) {
+//            std::cout << "current: " << updateIter + 1 << ", total block: "
+//                    << batchBlock << std::endl;
+//            metric.print();
+//            }
         }
 
         auto time_end = std::chrono::high_resolution_clock::now();
         std::cout << "Train finished. Total time taken is: "
             << std::chrono::duration<double>(time_end - time_start).count()
             << "s" << std::endl;
-        float accuracy = metric.getAccuracy();
-        std::cout << "train set acc:" << metric.getAccuracy() << std::endl;
+        //float accuracy = metric.getAccuracy();
+        //std::cout << "train set acc:" << metric.getAccuracy() << std::endl;
     }
+    profiler.EndEvent();
 }
 
 Category Classifier::predict(const Feature &feature, int excluded_class) {
