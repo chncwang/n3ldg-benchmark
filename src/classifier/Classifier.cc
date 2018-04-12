@@ -156,7 +156,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
     int non_exceeds_time = 0;
     auto time_start = std::chrono::high_resolution_clock::now();
     n3ldg_cuda::Profiler &profiler = n3ldg_cuda::Profiler::Ins();
-    profiler.SetEnabled(true);
+    profiler.SetEnabled(false);
     profiler.BeginEvent("total");
     for (int iter = 0; iter < 1; ++iter) {
         std::cout << "##### Iteration " << iter << std::endl;
@@ -186,7 +186,9 @@ void Classifier::train(const string &trainFile, const string &devFile,
             //metric.overall_label_count += m_driver._metric.overall_label_count;
             //metric.correct_label_count += m_driver._metric.correct_label_count;
 
+            profiler.BeginEvent("model update");
             m_driver.updateModel();
+            profiler.EndCudaEvent();
 
 //            if (updateIter % 10 == 0) {
 //            std::cout << "current: " << updateIter + 1 << ", total block: "
