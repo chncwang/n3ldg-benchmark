@@ -156,7 +156,7 @@ void Classifier::train(const string &trainFile, const string &devFile,
     int non_exceeds_time = 0;
     auto time_start = std::chrono::high_resolution_clock::now();
     n3ldg_cuda::Profiler &profiler = n3ldg_cuda::Profiler::Ins();
-    profiler.SetEnabled(false);
+    profiler.SetEnabled(true);
     profiler.BeginEvent("total");
     for (int iter = 0; iter < 1; ++iter) {
         std::cout << "##### Iteration " << iter << std::endl;
