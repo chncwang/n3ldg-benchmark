@@ -81,11 +81,15 @@ public:
             const Example &example = examples.at(count);
 
             //forward
+            profiler.BeginEvent("construct graph");
             _builders.at(count).forward(example.m_feature, true);
+            profiler.EndCudaEvent();
 
         }
 
+        profiler.BeginEvent("batch");
         _cg.compute();
+        profiler.EndCudaEvent();
 #if USE_GPU
         std::vector<Node*> outputs;
         outputs.reserve(example_num);
@@ -98,7 +102,9 @@ public:
         }
         n3ldg_cuda::DeviceInt correct_count;
         correct_count.init();
+        profiler.BeginEvent("loss");
         _modelparams.loss.loss(outputs, answers, correct_count, example_num);
+        profiler.EndCudaEvent();
         correct_count.copyFromDeviceToHost();
 #if TEST_CUDA
         int previous_correct_count = _metric.correct_label_count;
@@ -119,11 +125,15 @@ public:
 #else
         for (int count = 0; count < example_num; count++) {
             const Example &example = examples.at(count);
+            profiler.BeginEvent("loss");
             cost += _modelparams.loss.loss(&_builders.at(count)._neural_output,
                 example.m_category, _metric, example_num);
+            profiler.EndEvent();
         }
 #endif
+        profiler.BeginEvent("backward");
         _cg.backward();
+        profiler.EndCudaEvent();
         return cost;
     }
 

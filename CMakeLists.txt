@@ -71,7 +71,7 @@ ELSE()
     ADD_DEFINITIONS(-DDEVICE_MEMORY=2)
 ENDIF()
 
-INCLUDE_DIRECTORIES(eigen N3LDG/include ${SRC_DIR}/basic ${SRC_DIR}/classifier/cnn)
+INCLUDE_DIRECTORIES(eigen N3LDG/include ${SRC_DIR}/basic ${SRC_DIR}/classifier/tree-lstm)
 IF(USE_CUDA)
     ADD_DEFINITIONS(-DUSE_GPU)
     INCLUDE_DIRECTORIES(N3LDG/cnmem/include N3LDG/cuda N3LDG/include)
